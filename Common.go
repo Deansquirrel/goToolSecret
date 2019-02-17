@@ -6,15 +6,20 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"strings"
+	"sync"
 )
 
 var key []byte
 
+var rwLock sync.RWMutex
+
 func init() {
-	key = []byte("Deansquirrel521247944341")
+	SetCode("Deansquirrel521247944341")
 }
 
 func SetCode(code string) {
+	rwLock.Lock()
+	defer rwLock.Unlock()
 	code = strings.Trim(code, " ")
 	if code == "" {
 		key = nil
@@ -47,6 +52,8 @@ func DecryptStr(str string) (string, error) {
 
 //加密
 func Encrypt(str []byte) ([]byte, error) {
+	rwLock.RLock()
+	defer rwLock.RUnlock()
 	if key == nil {
 		return str, nil
 	}
@@ -64,6 +71,8 @@ func Encrypt(str []byte) ([]byte, error) {
 
 //解密
 func Decrypt(str []byte) ([]byte, error) {
+	rwLock.RLock()
+	defer rwLock.RUnlock()
 	if key == nil {
 		return str, nil
 	}
