@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"github.com/Deansquirrel/goToolCommon"
-	"github.com/kataras/iris/core/errors"
 )
 
 //将明文加密为Base64格式的密文
 //plainText原文
 //key密码
 func EncryptToBase64Format(plainText string, key string) (string, error) {
-	sMD5 := goToolCommon.Md5([]byte(plainText + key))
+	sMD5 := goToolCommon.Md5([]byte(key + plainText))
 
 	var bufferResult bytes.Buffer
 	{
@@ -97,11 +97,11 @@ func DecryptFromBase64Format(cipherText string, key string) (string, error) {
 	plainByte := resultByte[16+len(keyByte):]
 
 	var bufferTemp bytes.Buffer
-	_, err = bufferTemp.Write(plainByte)
+	_, err = bufferTemp.Write(keyByte)
 	if err != nil {
 		return "", err
 	}
-	_, err = bufferTemp.Write(keyByte)
+	_, err = bufferTemp.Write(plainByte)
 	if err != nil {
 		return "", err
 	}
