@@ -12,7 +12,12 @@ import (
 //plainText原文
 //key密码
 func EncryptToBase64Format(plainText string, key string) (string, error) {
-	sMD5 := goToolCommon.Md5([]byte(key + plainText))
+	sPlain, err := goToolCommon.EncodeGB18030([]byte(key + plainText))
+	if err != nil {
+		return "", err
+	}
+
+	sMD5 := goToolCommon.Md5(sPlain)
 
 	var bufferResult bytes.Buffer
 	{
@@ -24,14 +29,20 @@ func EncryptToBase64Format(plainText string, key string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		_, err = bufferResult.Write([]byte(key))
+
+		_, err = bufferResult.Write(sPlain)
 		if err != nil {
 			return "", err
 		}
-		_, err = bufferResult.Write([]byte(plainText))
-		if err != nil {
-			return "", err
-		}
+
+		//_, err = bufferResult.Write([]byte(key))
+		//if err != nil {
+		//	return "", err
+		//}
+		//_, err = bufferResult.Write([]byte(plainText))
+		//if err != nil {
+		//	return "", err
+		//}
 	}
 	resultByte := bufferResult.Bytes()
 
@@ -115,5 +126,10 @@ func DecryptFromBase64Format(cipherText string, key string) (string, error) {
 	if !bytes.Equal(sMD5Check, r) {
 		return "", errors.New("解密失败。（校验错误）")
 	}
-	return string(plainByte), nil
+
+	rByte, err := goToolCommon.DecodeGB18030(plainByte)
+	if err != nil {
+		return "", err
+	}
+	return string(rByte), nil
 }
